@@ -13,20 +13,36 @@ nltk.download('stopwords')
 nltk.download('punkt')
 
 class SearchScholarView(APIView):
+    documents = None
+    vectorizer = None
+    tfidf_matrix = None
+    preprocessed_docs = None
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.stemmer = PorterStemmer()
         self.stop_words = set(stopwords.words('english'))
-        self.data_file = os.path.join(
-            settings.BASE_DIR, "..", "crawler", "data", "publications.json"
-        )
+        self.data_file = os.path.join(settings.BASE_DIR, "..", "crawler", "data", "publications.json")
+
+        # Load documents & precompute TF-IDF once
+        self.load_documents()
+        if self.documents:
+            self.preprocessed_docs = [
+                " ".join(self.pre_process(doc.get("title", "") + " " + doc.get("abstract", "")))
+                for doc in self.documents.values()
+            ]
+            self.vectorizer = TfidfVectorizer()
+            self.tfidf_matrix = self.vectorizer.fit_transform(self.preprocessed_docs)
 
     def load_documents(self):
-        with open(self.data_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        if isinstance(data, list):
-            return {i: pub for i, pub in enumerate(data, 1)}
-        return {1: data}
+        if not self.documents:
+            with open(self.data_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, list):
+                self.documents = {i: pub for i, pub in enumerate(data, 1)}
+            else:
+                self.documents = {1: data}
+        return self.documents
 
     def pre_process(self, text):
         tokens = word_tokenize(text.lower())
@@ -37,29 +53,17 @@ class SearchScholarView(APIView):
         if not query:
             return Response({"error": "Query is required"}, status=400)
 
-        documents = self.load_documents()
         page = int(request.GET.get("page", 1))
         page_size = 10
 
-        # Build corpus and vectorize
-        corpus = [
-            " ".join(self.pre_process(doc.get("title", "") + " " + doc.get("abstract", "")))
-            for doc in documents.values()
-        ]
-        vectorizer = TfidfVectorizer()
-        tfidf_matrix = vectorizer.fit_transform(corpus)
+        query_vector = self.vectorizer.transform([" ".join(self.pre_process(query))])
+        similarities = cosine_similarity(query_vector, self.tfidf_matrix).flatten()
 
-        # Process query and compute similarity
-        query_vector = vectorizer.transform([" ".join(self.pre_process(query))])
-        similarities = cosine_similarity(query_vector, tfidf_matrix).flatten()
-
-        # Rank documents
-        ranked_docs = sorted(zip(documents.keys(), similarities), key=lambda x: x[1], reverse=True)
-
-        # Format results
+        # Rank and paginate
+        ranked_docs = sorted(zip(self.documents.keys(), similarities), key=lambda x: x[1], reverse=True)
         results = []
         for doc_id, score in ranked_docs:
-            doc = documents[doc_id]
+            doc = self.documents[doc_id]
             authors = [{"name": a["name"], "profile": a.get("profile")} for a in doc.get("authors", [])]
             results.append({
                 "title": doc.get("title"),
@@ -70,7 +74,6 @@ class SearchScholarView(APIView):
                 "score": float(score),
             })
 
-        # Pagination
         total_pages = (len(results) + page_size - 1) // page_size
         start = (page - 1) * page_size
         end = start + page_size
@@ -81,3 +84,4 @@ class SearchScholarView(APIView):
             "page": page,
             "total_pages": total_pages
         }, status=status.HTTP_200_OK)
+
