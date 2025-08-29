@@ -37,17 +37,50 @@ It crawls the relevant web pages from [PurePortal of Coventry University], extra
 
 1. **Clone the repository**  
 
-```bash
+```
 git clone https://github.com/sixdgt/IR_STW7071CEM_Assignment.git
 cd IR_STW7071CEM_Assignment
-
-# Create and activate a virtual environment (recommended)
+```
+2. **Create and activate a virtual environment (recommended)
+```
 python -m venv venv
 # On Windows
 venv\Scripts\activate
 # On Linux / macOS
 source venv/bin/activate
-
-# Install required packages
+```
+3. **Install required packages
+```
 pip install -r requirements.txt
+```
+## Required Packages
+The project uses the following Python packages:
+Package	Purpose
+- requests:	HTTP requests for web crawling
+- beautifulsoup4:	Parsing HTML content
+- lxml:	HTML parser
+- nltk:	Natural Language Processing (tokenization, stopwords, stemming)
+- scikit-learn:	TF-IDF vectorization and cosine similarity for search ranking
+- pandas:	Data storage and manipulation
+- schedule:	Scheduling automated crawling
+- tqdm:	Progress bars for crawling
+- react axios:  fetching apis
+- tailwindcss:  css utility framework
+
+## Notes
+- Make sure your internet connection is active when running the crawler.
+- The search engine is limited to publications authored by members of the FBL department.
+- Results are ranked based on TF-IDF cosine similarity between user queries and publication data.
+- The crawler can be scheduled using the schedule library to update the index automatically.
+
+## License
+This project is licensed under the MIT License.
+
+# Follow me on:
+- **Facebook:** [CodeSandes](https://www.facebook.com/codesandes)
+- **Instagram:** [@codesandes](https://www.instagram.com/codesandes/)
+- **LinkedIn:** [tmgsandesh](https://www.linkedin.com/in/tmgsandesh/)
+- **YouTube:** [CodeSandesh](https://www.youtube.com/@codesandesh)
+- **TikTok:** [@codesandesh](https://www.tiktok.com/codesandesh/)
+
 
