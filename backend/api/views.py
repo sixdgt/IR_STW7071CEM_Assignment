@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-import json, os, nltk
+import json, os, nltk, random, joblib
 from django.conf import settings
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
@@ -11,6 +11,47 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 nltk.download('stopwords')
 nltk.download('punkt')
+
+# Path to dataset folder
+BASE_DIR = os.path.join(settings.BASE_DIR, "..", "data", "classification")
+
+# Dictionary to hold samples
+SAMPLES = {"business": [], "health": [], "politics": []}
+
+# Load all text files into memory at startup
+for category in SAMPLES.keys():
+    folder = os.path.join(BASE_DIR, category)
+    if os.path.exists(folder):
+        for filename in os.listdir(folder):
+            if filename.endswith(".txt"):
+                filepath = os.path.join(folder, filename)
+                with open(filepath, "r", encoding="utf-8") as f:
+                    SAMPLES[category].append(f.read())
+    else:
+        print(f"Folder not found: {folder}")
+
+class SampleTextView(APIView):
+    def clean_sample(self, text):
+        """Remove metadata lines and empty lines for readability"""
+        lines = text.split("\n")
+        lines = [line.strip() for line in lines if line.strip() and not line.startswith("#meta:")]
+        return "\n\n".join(lines)
+
+    def get(self, request, category):
+        category = category.lower()
+        if category not in SAMPLES:
+            return Response({"error": "Invalid category"}, status=400)
+
+        if not SAMPLES[category]:
+            return Response({"error": "No samples available"}, status=404)
+
+        raw_text = random.choice(SAMPLES[category])
+        clean_text = self.clean_sample(raw_text)
+
+        return Response({
+            "category": category,
+            "sample": clean_text
+        })
 
 class SearchScholarView(APIView):
     documents = None
@@ -85,3 +126,28 @@ class SearchScholarView(APIView):
             "total_pages": total_pages
         }, status=status.HTTP_200_OK)
 
+class TextClassifierView(APIView):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Load model and vectorizer once when server starts
+        self.model = joblib.load(os.path.join(settings.BASE_DIR, "..", "classifier", "logreg_model.pkl"))
+        self.vectorizer = joblib.load(os.path.join(settings.BASE_DIR, "..","classifier", "tfidf_vectorizer.pkl"))
+    
+    def post(self, request):
+        try:
+            text = request.data.get("text", "")
+            if not text:
+                return Response({"error": "No text provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Transform and predict
+            X = self.vectorizer.transform([text])
+            prediction = self.model.predict(X)[0]
+            probabilities = self.model.predict_proba(X)[0]
+
+            return Response({
+                "text": text,
+                "prediction": prediction,
+                "probabilities": {cls: float(prob) for cls, prob in zip(self.model.classes_, probabilities)}
+            })
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
