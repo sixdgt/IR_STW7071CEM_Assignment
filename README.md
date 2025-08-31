@@ -1,9 +1,6 @@
 # Coventry University FBL Publications Search Engine
-
 This project implements a **vertical search engine** comparable to Google Scholar, specialized in retrieving **papers and books published by members of Coventry University's School of Economics, Finance and Accounting**.  
-
-It crawls the relevant web pages from [PurePortal of Coventry University], extracts publication information, and allows users to search publications by keywords with results ranked by relevance.
-
+It crawls the relevant web pages from [PurePortal of Coventry University], extracts publication information, allows users to search publications by keywords, and classifies publication topics and other news articles headline using a Logistic Regression text classifier
 ---
 
 ## Features
@@ -31,6 +28,11 @@ It crawls the relevant web pages from [PurePortal of Coventry University], extra
   - Adheres to crawling etiquette to avoid overloading the server.  
   - Configurable crawl delays between requests.
 
+- **Text Classification
+  - Uses Logistic Regression to classify publication topics such as Business, Health, Politics, etc.
+  - Backend: Django API serving the trained model.
+  - Frontend: React interface displays predicted category with confidence scores.
+  - Helps users quickly filter publications by relevant topic.
 ---
 
 ## Installation
@@ -53,6 +55,13 @@ source venv/bin/activate
 ```
 pip install -r requirements.txt
 ```
+4. ** Frontend Setup
+- Navigate to the frontend folder and install dependencies:
+```
+cd frontend
+npm install
+npm run dev
+```
 ## Required Packages
 The project uses the following Python packages:
 Package	Purpose
@@ -67,11 +76,26 @@ Package	Purpose
 - react axios:  fetching apis
 - tailwindcss:  css utility framework
 
+## Usage
+** Run the crawler
+```
+python crawler.py
+```
+## Run django server
+```
+python manage.py runserver
+```
+## Start React frontend
+```
+npm run dev
+```
+
 ## Notes
 - Make sure your internet connection is active when running the crawler.
 - The search engine is limited to publications authored by members of the FBL department.
 - Results are ranked based on TF-IDF cosine similarity between user queries and publication data.
 - The crawler can be scheduled using the schedule library to update the index automatically.
+- The logistic regression classifier can be further fine-tuned with new datasets for better accuracy.
 
 ## License
 This project is licensed under the MIT License.
