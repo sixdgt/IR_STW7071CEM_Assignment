@@ -1,15 +1,21 @@
+import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSchool, faUniversity, faGlobe } from "@fortawesome/free-solid-svg-icons";
+
 function Footer(){
+    const currentYear = new Date().getFullYear();
     return (
-        <>
-            <footer className="py-4 text-center text-sm text-gray-500 border-t border-gray-200">
-                <nav className="flex justify-center space-x-4">
-                    <a href="https://softwarica.edu.np/" target='_blank' className="hover:underline">Softwarica College</a>
-                    <a href="https://www.coventry.ac.uk/" target='_blank' className="hover:underline">Coventry University</a>
-                    <a href="https://pureportal.coventry.ac.uk/" target='_blank' className="hover:underline">Coventry Pureportal</a>
-                    <a href="#" className="hover:underline">Terms & Conditions</a>
-                </nav>
-            </footer>
-        </>
+        <footer className="py-4 text-center text-sm text-sky-500 bg-gray-900 shadow-lg">
+            <nav className="flex justify-center space-x-4">
+                <span className="font-bold">&copy; {currentYear} Sandesh Tamang | </span>
+                <a href="https://softwarica.edu.np/" target='_blank' className="cursor-pointer">
+                <FontAwesomeIcon icon={faSchool} className="text-blue-500" /> Softwarica College</a>
+                <a href="https://www.coventry.ac.uk/" target='_blank' className="cursor-pointer">
+                <FontAwesomeIcon icon={faUniversity} className="text-green-500" /> Coventry University</a>
+                <a href="https://pureportal.coventry.ac.uk/" target='_blank' className="cursor-pointer">
+                <FontAwesomeIcon icon={faGlobe} className="text-yellow-500" /> Coventry Pureportal</a>
+            </nav>
+        </footer>
     );
 }
 

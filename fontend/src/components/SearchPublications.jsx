@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import ResultsPage from "./ResultsPage";
-import Footer from "./Footer";
 import axios from "axios";
 
 const SearchPublications = () => {
@@ -61,7 +60,6 @@ const SearchPublications = () => {
         setPage={setPage}
         totalPages={totalPages}
       />
-      <Footer />
     </>
   );
 };
