@@ -25,7 +25,7 @@ drive.mount('/content/drive')
 # base path of dataset
 base_path = "/content/drive/MyDrive/ir_assignment/classification"
 
-categories = ["business", "health", "politics"]
+categories = ["health", "politics", "business"]
 texts, labels = [], []
 
 # combining datasets from diffrent paths
@@ -49,7 +49,7 @@ vectorizer = TfidfVectorizer(stop_words="english", ngram_range=(1,2))
 X_train_tfidf = vectorizer.fit_transform(X_train)
 X_test_tfidf = vectorizer.transform(X_test)
 
-# Train Logistic Regression
+# Trainining Logistic Regression
 clf = LogisticRegression(max_iter=1000, solver="lbfgs")
 clf.fit(X_train_tfidf, y_train)
 
@@ -58,10 +58,13 @@ y_pred = clf.predict(X_test_tfidf)
 print("Classification Report:\n", classification_report(y_test, y_pred))
 print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
 
-# Save model + vectorizer
+# Saving model + vectorizer pkl file
 joblib.dump(clf, "logreg_model.pkl")
 joblib.dump(vectorizer, "tfidf_vectorizer.pkl")
 
+# testing the classification with raw input
+
+# classification test function
 def classify_text(text):
     vectorizer = joblib.load("tfidf_vectorizer.pkl")
     clf = joblib.load("logreg_model.pkl")
@@ -71,7 +74,7 @@ def classify_text(text):
     return prediction, dict(zip(clf.classes_, proba))
 
 # Example interaction
-doc = "Nepal goverment is planning to support local level health posts and hospitals for the betterment of the public services. Also, the prime minister of nepal is visiting china tomorrow."
+doc = "Regular exercise and a balanced diet can significantly reduce the risk of heart disease and diabetes"
 label, probs = classify_text(doc)
 print("Predicted:", label)
 print("Probabilities:", probs)
