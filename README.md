@@ -1,5 +1,7 @@
 # Coventry University FBL Publications Search Engine
+
 This project implements a **vertical search engine** comparable to Google Scholar, specialized in retrieving **papers and books published by members of Coventry University's School of Economics, Finance and Accounting**.  
+
 It crawls the relevant web pages from [PurePortal of Coventry University], extracts publication information, allows users to search publications by keywords, and classifies publication topics and other news articles headline using a Logistic Regression text classifier
 ---
 
