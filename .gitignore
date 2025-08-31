@@ -1,9 +1,5 @@
 # python virtual env
 /env/
 
-# environment variable
-.env
-/frontend/.env
-
 # node modules
 /frontend/node_modules/
